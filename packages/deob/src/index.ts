@@ -131,7 +131,7 @@ export class Deob {
     this.reParse()
   }
 
-  run(): DeobResult {
+  async run(): Promise<DeobResult> {
     let outputCode = ''
 
     const historys: parser.ParseResult<t.File>[] = []
@@ -142,14 +142,14 @@ export class Deob {
       /** 格式预处理 */
       () => this.prepare(),
       /** 定位解密器 */
-      () => {
+      async () => {
         let stringArray: StringArray | undefined
         let decoders: Decoder[] = []
         let rotators: ArrayRotator[] = []
         let setupCode: string = ''
 
         if (options.decoderLocationMethod === 'stringArray') {
-          const { decoders: ds, rotators: r, stringArray: s, setupCode: scode } = findDecoderByArray(this.ast, options.stringArraylength)
+          const { decoders: ds, rotators: r, stringArray: s, setupCode: scode } = await findDecoderByArray(this.ast, options.stringArraylength)
 
           stringArray = s as any
           rotators = r
@@ -230,7 +230,7 @@ export class Deob {
     ].filter(Boolean) as (() => unknown)[]
 
     for (let i = 0; i < stages.length; i++) {
-      stages[i]()
+      await stages[i]()
 
       if (options.isDebug) {
         const jscode = generate(this.ast, {

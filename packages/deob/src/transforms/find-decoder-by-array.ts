@@ -5,8 +5,9 @@ import traverse from '@babel/traverse'
 import { generate } from '../ast-utils'
 import { Decoder } from '../deobfuscate/decoder'
 import type { ArrayRotator } from '../deobfuscate/array-rotator'
+import prettier from 'prettier'
 
-export function findDecoderByArray(ast: t.Node, count: number = 100) {
+export async function findDecoderByArray(ast: t.Node, count: number = 100) {
   // 大数组 有可能是以函数形式包裹的
   let stringArray: {
     path: NodePath<t.Node>
@@ -129,8 +130,16 @@ export function findDecoderByArray(ast: t.Node, count: number = 100) {
     .map(decoder => generate(decoder.path.node, generateOptions))
     .join(';\n')
 
-  const setupCode = [stringArrayCode, rotatorCode, decoderCode].join(';\n')
+  let setupCode = [stringArrayCode, rotatorCode, decoderCode].join(';\n')
 
+  setupCode  = await prettier.format(setupCode, { 
+    semi: true, // 是否使用分号
+    singleQuote: true, // 是否使用单引号
+    tabWidth: 2, // 缩进宽度
+    trailingComma: "es5", // 是否使用尾随逗号
+    parser: "babel", 
+  });
+  
   return {
     stringArray,
     rotators,

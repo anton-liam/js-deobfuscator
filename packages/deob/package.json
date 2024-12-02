@@ -29,7 +29,8 @@
     "@codemod/matchers": "^1.7.0",
     "babel-plugin-minify-mangle-names": "^0.5.1",
     "commander": "^11.1.0",
-    "debug": "^4.3.4"
+    "debug": "^4.3.4",
+    "prettier": "^3.0.3"
   },
   "devDependencies": {
     "@types/babel__code-frame": "^7.0.6",
