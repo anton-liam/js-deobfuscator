@@ -28,6 +28,7 @@ import { designDecoder } from './transforms/design-decoder'
 import { decodeStrings } from './transforms/decode-strings'
 import { markKeyword } from './transforms/mark-keyword'
 import mangle from './transforms/mangle'
+import type { NodePath } from '@babel/traverse'
 
 export {
   type Options,
@@ -145,7 +146,7 @@ export class Deob {
       async () => {
         let stringArray: StringArray | undefined
         let decoders: Decoder[] = []
-        let rotators: ArrayRotator[] = []
+        let rotators: (ArrayRotator | NodePath)[] = []
         let setupCode: string = ''
 
         if (options.decoderLocationMethod === 'stringArray') {

@@ -6,6 +6,7 @@ import { generate } from '../ast-utils'
 import { Decoder } from '../deobfuscate/decoder'
 import type { ArrayRotator } from '../deobfuscate/array-rotator'
 import prettier from 'prettier'
+import  {functionExpression, blockStatement, callExpression, parenthesizedExpression, expressionStatement} from '@babel/types'
 
 export async function findDecoderByArray(ast: t.Node, count: number = 100) {
   // 大数组 有可能是以函数形式包裹的
@@ -16,7 +17,7 @@ export async function findDecoderByArray(ast: t.Node, count: number = 100) {
     length: number
   } | undefined
   // 乱序函数
-  const rotators: ArrayRotator[] = []
+  const rotators: (ArrayRotator | NodePath)[] = []
   // 解密器
   const decoders: Decoder[] = []
 
@@ -117,6 +118,78 @@ export async function findDecoderByArray(ast: t.Node, count: number = 100) {
       path.skip()
     },
   })
+
+  // traverse(ast, {
+  //   ForStatement(path) {
+  //     if (!path.node?.init && !path.node?.test && !path.node?.update) {
+  //       const body = (path.parent as any).body;
+  //       const index = body?.findIndex((p: any) => p == path.node);
+  //       if (index >= 2) {
+  //           const decodeDefine = body[index-2];
+  //           const stringDefine = body[index-1];
+
+  //           const hasDecodeDefine = decodeDefine?.declarations.length>0 && decoders.find(d => d.name == decodeDefine.declarations[0].init.name)
+  //           const hasStringDefine = stringDefine?.declarations.length>0 && stringDefine.declarations[0].init.callee.name == stringArray?.name;
+
+  //           if (hasDecodeDefine && hasStringDefine) {
+  //             decodeDefine.declarations[0].remove();
+  //             rotators.push(decodeDefine, stringDefine, path as any)
+
+
+  //             // const start = index - 2;
+  //             // const end = index;
+  //             // const nodesToWrap = body.slice(start, end);
+  //             // const _functionExpression = functionExpression(
+  //             //   null,
+  //             //   // 没有名字的匿名函数
+  //             //   [],
+  //             //   // 无参数
+  //             //   blockStatement(nodesToWrap)
+  //             //   // 原始代码的内容作为函数体
+  //             // );
+  //             // const iife = callExpression(
+  //             //   parenthesizedExpression(_functionExpression),
+  //             //   []
+  //             //   // 无参数传递
+  //             // );
+  //             // (path.parent as any).body.splice(start,0, iife);
+  //             // rotators.push(iife as any)
+  //           }
+  //       }
+  //     }
+  //   },
+  // });
+
+  // // 2. 创建闭包（IIFE）
+  // traverse(ast, {
+  //   Program(path) {
+      
+  //     if (rotators.length) {
+  //       const body = path.node.body;
+  //       const start = body?.findIndex((p: any) => p == rotators[0]);
+  //       const end = body?.findIndex((p: any) => p == rotators[rotators.length - 1]);
+  //       // 选中需要包裹闭包的节点：前两个语句
+  //       const nodesToWrap = path.node.body.slice(start, end);
+  //       // 创建匿名函数表达式 (function() {...})
+  //       const _functionExpression = functionExpression(
+  //         null, // 没有名字的匿名函数
+  //         [], // 无参数
+  //         blockStatement(nodesToWrap) // 原始代码的内容作为函数体
+  //       );
+
+  //       // 将函数表达式转换为立即执行的调用表达式 (function() {...})()
+  //       const iife = callExpression(
+  //         parenthesizedExpression(_functionExpression),
+  //         [] // 无参数传递
+  //       );
+
+  //       // 替换整个 Program 的 body 为 IIFE
+  //       path.node.body = [expressionStatement(iife)];
+  //     }
+      
+  //   }
+  // });
+
 
   const generateOptions = {
     compact: true,
